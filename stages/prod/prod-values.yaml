@@ -12,3 +12,22 @@ ingress:
 #     alb.ingress.kubernetes.io/auth-on-unauthenticated-request: authenticate
 #     alb.ingress.kubernetes.io/auth-session-cookie: kibana-cookie
 #     alb.ingress.kubernetes.io/auth-session-timeout: '3600'
+
+nginxconfigmap:
+  defaultConf: |-
+    server {
+      listen 443;
+      server_name $host;
+      rewrite ^/$ https://$host/_plugin/kibana redirect;
+      location ^~ /_plugin/kibana {
+        proxy_pass https://<vpc_domain>/_plugin/kibana/;
+        proxy_cookie_domain <vpc_domain> $host;
+        proxy_set_header Accept-Encoding "";
+        sub_filter_types *;
+        sub_filter <vpc_domain> $host;
+        sub_filter_once off;
+        proxy_buffer_size 128k;
+        proxy_buffers 4 256k;
+        proxy_busy_buffers_size 256k;
+      }
+    }
