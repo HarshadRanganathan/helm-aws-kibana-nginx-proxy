@@ -1,0 +1,12 @@
+fullname: "kibana-nginx-proxy"
+ingress:
+  hostname: # host name to match
+  annotations:
+    alb.ingress.kubernetes.io/tags: Stage=prod,App=KibanaProxy
+    alb.ingress.kubernetes.io/certificate-arn: # ACM cert ARN
+    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=prod-us-east-1,idle_timeout.timeout_seconds=600,access_logs.s3.prefix=prod/kibana-proxy
+    alb.ingress.kubernetes.io/auth-type: cognito
+    alb.ingress.kubernetes.io/auth-idp-cognito: '{"userPoolARN":"arn:aws:cognito-idp:us-east-1:<account-id>:userpool/<identifier>","userPoolClientID":"","userPoolDomain":"<domain_prefix>.auth.us-east-1.amazoncognito.com"}'
+    alb.ingress.kubernetes.io/auth-on-unauthenticated-request: authenticate
+    alb.ingress.kubernetes.io/auth-session-cookie: kibana-cookie
+    alb.ingress.kubernetes.io/auth-session-timeout: '3600'
