@@ -1,6 +1,6 @@
 service:
   labels:
-    app: nginx-kibana-proxy
+    app: kibana-nginx-proxy
 ingress:
   annotations:
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
