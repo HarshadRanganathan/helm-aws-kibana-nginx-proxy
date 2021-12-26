@@ -1,0 +1,39 @@
+fullname: "kibana-nginx-proxy"
+
+nginx:
+  namespace: platform
+  replicas: 1
+  image: ymqytw/nginxhttps
+  imagePullPolicy: IfNotPresent
+  imageTag: "1.5"
+  containerPort: 443
+
+service:
+  name:
+  labels:
+    app: nginx
+  annotations: {}
+  domain: {}
+  spec:
+    serviceType: NodePort
+
+loadBalancerSourceRanges: []
+
+persistence: true
+
+restartPolicy: Always
+
+nginxconfigmap:
+  defaultConf: {}
+
+servicePort: 443
+ingress:
+  enabled: true
+  tls:
+    enabled: false
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
