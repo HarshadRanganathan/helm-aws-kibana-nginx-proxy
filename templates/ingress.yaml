@@ -1,0 +1,34 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: '{{ template "fullname" . }}'
+  labels:
+    app: '{{ template "fullname" . }}'
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- if .Values.ingress.labels }}
+{{ toYaml .Values.ingress.labels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.annotations }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.hostname }}
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+{{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.hostname }}
+      http:
+        paths:
+          - path:
+            backend:
+              serviceName: '{{ template "fullname" . }}'
+              servicePort: {{ .Values.servicePort }}
+{{- if .Values.ingress.tls.enabled }}
+  tls:
+    - secretName: '{{ template "fullname" . }}-tls'
+      hosts:
+        - {{ .Values.ingress.hostname }}
+{{- end -}}
+{{ end -}}
