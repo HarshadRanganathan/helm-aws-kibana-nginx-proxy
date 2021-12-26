@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: '{{ template "fullname" . }}'
+    chart: '{{.Chart.Name}}-{{.Chart.Version}}'
+    heritage: '{{.Release.Service}}'
+    release: '{{.Release.Name}}'
+  name: '{{ template "fullname" . }}'
+  namespace: '{{.Values.nginx.namespace}}'
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.nginx.replicas }}
+{{- end }}
+  selector:
+    matchLabels:
+      app: '{{ template "fullname" . }}'
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: '{{ template "fullname" . }}'
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+      - name: tls-volume
+        secret:
+          defaultMode: 420
+          secretName: '{{ template "fullname" . }}-tls'
+      - configMap:
+          defaultMode: 420
+          name: '{{ template "fullname" . }}-nginxconfigmap'
+        name: configmap-volume
+      containers:
+      - command:
+        - /home/auto-reload-nginx.sh
+        image: '{{.Values.nginx.image}}:{{.Values.nginx.imageTag}}'
+        imagePullPolicy: '{{.Values.nginx.imagePullPolicy}}'
+        name: '{{ template "fullname" . }}'
+        ports:
+        - containerPort: {{ .Values.nginx.containerPort }}
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: tls-volume
+        - mountPath: /etc/nginx/conf.d
+          name: configmap-volume
+      restartPolicy: '{{.Values.nginx.restartPolicy}}'
+      schedulerName: default-scheduler
